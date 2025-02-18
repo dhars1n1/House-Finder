@@ -1,0 +1,409 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kudil - Property Listings</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+    <link rel="stylesheet" href="{% static 'css/listings.css' %}">
+</head>
+<body>
+    <!-- Header/Navigation -->
+    <nav class="navbar navbar-expand-lg fixed-top bg-white">
+        <div class="container">
+            <a class="navbar-brand" href="{% url 'index' %}">
+                <div class="brand-logo">
+                    <i class="fas fa-home"></i>
+                    <span class="brand-text">kudil</span>
+                </div>
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <div class="quick-actions ms-auto me-4">
+                    <a href="{% url 'dashboard' %}" class="btn btn-outline-primary quick-action-btn">
+                        <i class="fas fa-tachometer-alt"></i>
+                        <span>Dashboard</span>
+                    </a>
+                    <a href="#" class="btn btn-outline-primary quick-action-btn">
+                        <i class="fas fa-hand-holding-heart"></i>
+                        <span>Financial Support</span>
+                    </a>
+                    <a href="#" class="btn btn-outline-primary quick-action-btn">
+                        <i class="fas fa-heart"></i>
+                        <span>Saved Listings</span>
+                    </a>
+                    <a href="#" class="btn btn-outline-primary quick-action-btn">
+                        <i class="fas fa-users"></i>
+                        <span>Community</span>
+                    </a>
+                    <a href="#" class="btn btn-outline-primary quick-action-btn">
+                        <i class="fas fa-comments"></i>
+                        <span>Messages</span>
+                        <span class="message-badge">3</span>
+                    </a>
+                </div>
+                <!-- User Profile -->
+                <div class="user-profile">
+                    <div class="dropdown">
+                        <button class="profile-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <img src="{% static 'assets/images/avatar-placeholder.jpg' %}" alt="Profile" class="avatar-img">
+                            <div class="user-info">
+                                <span class="user-name">{{ user.username }}</span>
+                                <span class="user-role">Home Seeker</span>
+                            </div>
+                            <i class="fas fa-chevron-down ms-2"></i>
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end profile-menu">
+                            <li>
+                                <a class="dropdown-item" href="#">
+                                    <i class="fas fa-user"></i>
+                                    <span>Edit Profile</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item" href="#">
+                                    <i class="fas fa-clipboard-list"></i>
+                                    <span>My Requirements</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item" href="#">
+                                    <i class="fas fa-bell"></i>
+                                    <span>Notifications</span>
+                                    <span class="notification-badge">5</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item" href="#">
+                                    <i class="fas fa-cog"></i>
+                                    <span>Settings</span>
+                                </a>
+                            </li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li>
+                                <a class="dropdown-item text-danger" href="#">
+                                    <i class="fas fa-sign-out-alt"></i>
+                                    <span>Logout</span>
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+    
+    <!-- Main Content -->
+    <div class="main-content">
+        <div class="container-fluid">
+            <div class="row">
+                <!-- Filters Sidebar -->
+                <div class="col-lg-3 filters-sidebar">
+                    <!-- Mobile Toggle -->
+                    <button class="d-lg-none w-100 btn btn-primary mb-3" type="button" data-bs-toggle="collapse" data-bs-target="#filtersCollapse">
+                        <i class="fas fa-filter me-2"></i> Show Filters
+                    </button>
+                    
+                    <div class="collapse d-lg-block" id="filtersCollapse">
+                        <div class="filters-container">
+                            <div class="d-flex justify-content-between align-items-center mb-4">
+                                <h4 class="mb-0">Filters</h4>
+                                <button type="button" class="btn btn-link text-muted p-0" onclick="clearFilters()">
+                                    <i class="fas fa-undo-alt me-1"></i> Clear All
+                                </button>
+                            </div>
+    
+                            <form id="filterForm" method="GET">
+                                <!-- Location Search -->
+                                <div class="filter-section">
+                                    <div class="accordion-item">
+                                        <h2 class="accordion-header">
+                                            <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#locationCollapse">
+                                                Location
+                                            </button>
+                                        </h2>
+                                        <div id="locationCollapse" class="accordion-collapse collapse show">
+                                            <div class="accordion-body">
+                                                <input type="text" class="form-control" name="location" placeholder="Search location...">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+    
+                                <!-- Price Range -->
+                                <div class="filter-section">
+                                    <div class="accordion-item">
+                                        <h2 class="accordion-header">
+                                            <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#priceCollapse">
+                                                Price Range
+                                            </button>
+                                        </h2>
+                                        <div id="priceCollapse" class="accordion-collapse collapse show">
+                                            <div class="accordion-body">
+                                                <div class="mb-3">
+                                                    <label for="minPrice" class="form-label">Min Price</label>
+                                                    <input type="number" class="form-control" name="min_price" min="0">
+                                                </div>
+                                                <div class="mb-3">
+                                                    <label for="maxPrice" class="form-label">Max Price</label>
+                                                    <input type="number" class="form-control" name="max_price" min="0">
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+    
+                                <!-- Property Type -->
+                                <div class="filter-section">
+                                    <div class="accordion-item">
+                                        <h2 class="accordion-header">
+                                            <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#propertyTypeCollapse">
+                                                Property Type
+                                            </button>
+                                        </h2>
+                                        <div id="propertyTypeCollapse" class="accordion-collapse collapse show">
+                                            <div class="accordion-body">
+                                                {% for type in property_types %}
+                                                <div class="form-check">
+                                                    <input class="form-check-input" type="checkbox" name="property_type" value="{{ type.value }}" id="type{{ type.value }}">
+                                                    <label class="form-check-label" for="type{{ type.value }}">{{ type.label }}</label>
+                                                </div>
+                                                {% endfor %}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+    
+                                <button type="submit" class="btn btn-primary w-100 mt-3">Apply Filters</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+    
+                <!-- Listings -->
+                <div class="col-lg-9">
+                    <div class="listings-grid" id="gridView">
+                        <div class="row" id="listingsContainer">
+                            {% for property in properties %}
+                            <div class="col-md-6 col-lg-4 mb-4">
+                                <div class="property-card">
+                                    <div class="position-relative">
+                                        <img src="{{ property.image.url }}" alt="{{ property.title }}" class="property-image">
+                                        <span class="property-status">{{ property.status }}</span>
+                                        <button class="btn-favorite">
+                                            <i class="far fa-heart"></i>
+                                        </button>
+                                    </div>
+                                    <div class="property-details p-3">
+                                        <h5 class="property-title">{{ property.title }}</h5>
+                                        <p class="property-price">${{ property.price }}</p>
+                                        <div class="property-features">
+                                            <span><i class="fas fa-bed"></i> {{ property.bedrooms }} Beds</span>
+                                            <span><i class="fas fa-bath"></i> {{ property.bathrooms }} Baths</span>
+                                            <span><i class="fas fa-ruler-combined"></i> {{ property.area }} sqft</span>
+                                        </div>
+                                        <p><i class="fas fa-map-marker-alt"></i> {{ property.address }}</p>
+                                        <button class="btn btn-primary w-100 mt-3">View Details</button>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        
+                        <!-- Pagination -->
+                        <nav aria-label="Page navigation" class="mt-4">
+                            <ul class="pagination justify-content-center">
+                                {% if properties.has_previous %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ properties.previous_page_number }}">Previous</a>
+                                </li>
+                                {% endif %}
+                                
+                                {% for num in properties.paginator.page_range %}
+                                <li class="page-item {% if properties.number == num %}active{% endif %}">
+                                    <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+                                </li>
+                                {% endfor %}
+                                
+                                {% if properties.has_next %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ properties.next_page_number }}">Next</a>
+                                </li>
+                                {% endif %}
+                            </ul>
+                        </nav>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- Loading Overlay -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Loading...</span>
+        </div>
+    </div>
+    
+    <!-- Chatbot Widget -->
+    <div class="chatbot-widget">
+        <button class="chatbot-toggle" onclick="toggleChatbot()">
+            <i class="fas fa-comments"></i>
+            <span class="badge bg-danger notification-badge">1</span>
+        </button>
+        
+        <div id="chatbotContainer" class="chatbot-container">
+            <div class="chatbot-header">
+                <div>
+                    <h5 class="mb-0">Kudil Assistant</h5>
+                    <small>We typically reply in a few minutes</small>
+                </div>
+                <button type="button" class="btn-close" onclick="toggleChatbot()"></button>
+            </div>
+            
+            <div id="chatbotMessages" class="chatbot-messages"></div>
+            
+            <div class="chatbot-input">
+                <input type="text" class="form-control" id="chatbotInput" placeholder="Type your message...">
+                <button class="btn btn-primary" onclick="sendMessage()">
+                    <i class="fas fa-paper-plane"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-4 mb-4 mb-md-0">
+                    <h5>About Kudil</h5>
+                    <p class="text-muted">Kudil is your trusted partner in finding sustainable and eco-friendly homes. We're committed to making sustainable living accessible to everyone.</p>
+                    <div class="social-links mt-3">
+                        <a href="#" class="me-2"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#" class="me-2"><i class="fab fa-twitter"></i></a>
+                        <a href="#" class="me-2"><i class="fab fa-instagram"></i></a>
+                        <a href="#"><i class="fab fa-linkedin-in"></i></a>
+                    </div>
+                </div>
+                
+                <div class="col-md-2 col-6 mb-4 mb-md-0">
+                    <h6>Quick Links</h6>
+                    <ul class="list-unstyled">
+                        <li><a href="{% url 'index' %}">Home</a></li>
+                        <li><a href="#">About Us</a></li>
+                        <li><a href="#">Contact</a></li>
+                        <li><a href="#">Blog</a></li>
+                    </ul>
+                </div>
+                
+                <div class="col-md-2 col-6 mb-4 mb-md-0">
+                    <h6>Resources</h6>
+                    <ul class="list-unstyled">
+                        <li><a href="#">Help Center</a></li>
+                        <li><a href="#">Community</a></li>
+                        <li><a href="#">Partners</a></li>
+                        <li><a href="#">Sustainability</a></li>
+                    </ul>
+                </div>
+                
+                <div class="col-md-4">
+                    <h6>Newsletter</h6>
+                    <p class="text-muted">Subscribe to get the latest updates on sustainable living.</p>
+                    <div class="input-group mb-3">
+                        <input type="email" class="form-control" placeholder="Enter your email">
+                        <button class="btn btn-primary" type="button">Subscribe</button>
+                    </div>
+                </div>
+            </div>
+            
+            <hr>
+            
+            <div class="row align-items-center">
+                <div class="col-md-6 text-center text-md-start">
+                    <p class="copyright mb-0">
+                        2025 Kudil. Made with <i class="fas fa-heart heart-icon"></i> in India
+                    </p>
+                </div>
+                <div class="col-md-6 text-center text-md-end mt-3 mt-md-0">
+                    <ul class="list-inline mb-0">
+                        <li class="list-inline-item"><a href="#">Privacy Policy</a></li>
+                        <li class="list-inline-item">•</li>
+                        <li class="list-inline-item"><a href="#">Terms of Use</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </footer>
+    
+    <!-- Required Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/leaflet.markercluster@1.4.1/dist/leaflet.markercluster.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/nouislider@14.6.3/distribute/nouislider.min.js"></script>
+    <script src="https://maps.googleapis.com/maps/api/js?key={{ GOOGLE_MAPS_API_KEY }}&libraries=places"></script>
+    <script src="{% static 'js/listings.js' %}"></script>
+    <script src="{% static 'js/chatbot.js' %}"></script>
+    <script>
+        function applyFilters(event) {
+            event.preventDefault();
+            const filters = {
+                location: document.getElementById('locationSearch').value,
+                minPrice: document.getElementById('minPrice').value,
+                maxPrice: document.getElementById('maxPrice').value,
+                propertyTypes: Array.from(document.querySelectorAll('input[type="checkbox"]:checked')).map(cb => cb.value)
+            };
+            filterProperties(filters);
+        }
+    
+        function filterProperties(filters) {
+            const properties = document.querySelectorAll('.property-card');
+            properties.forEach(property => {
+                const price = parseInt(property.querySelector('.property-price').textContent.replace(/[^0-9]/g, ''));
+                const location = property.querySelector('.property-info p').textContent;
+                
+                let show = true;
+                
+                if (filters.location && !location.toLowerCase().includes(filters.location.toLowerCase())) {
+                    show = false;
+                }
+                
+                if (filters.minPrice && price < parseInt(filters.minPrice)) {
+                    show = false;
+                }
+                
+                if (filters.maxPrice && price > parseInt(filters.maxPrice)) {
+                    show = false;
+                }
+                
+                property.closest('.col-md-6').style.display = show ? 'block' : 'none';
+            });
+        }
+    
+        function toggleFavorite(btn) {
+            const icon = btn.querySelector('i');
+            icon.classList.toggle('far');
+            icon.classList.toggle('fas');
+            icon.classList.toggle('text-danger');
+        }
+    
+        function viewPropertyDetails(propertyId) {
+            window.location.href = `{% url 'listing_details' %}?id=${propertyId}`;
+        }
+    </script>
+</body>
+</html>  
+    
