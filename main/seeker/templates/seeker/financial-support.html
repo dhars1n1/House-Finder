@@ -1,0 +1,460 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kudil - Financial Support</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+    <link rel="stylesheet" href="{% static 'css/financial-support.css' %}">
+</head>
+<body>
+    <!-- Header/Navigation -->
+    <nav class="navbar navbar-expand-lg fixed-top bg-white">
+        <div class="container">
+            <a class="navbar-brand" href="{% url 'index' %}">
+                <div class="brand-logo">
+                    <i class="fas fa-home"></i>
+                    <span class="brand-text">kudil</span>
+                </div>
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <div class="quick-actions ms-auto me-4">
+                    <a href="{% url 'dashboard' %}" class="btn btn-outline-primary quick-action-btn">
+                        <i class="fas fa-tachometer-alt"></i>
+                        <span>Dashboard</span>
+                    </a>
+                    <a href="{% url 'listings' %}" class="btn btn-outline-primary quick-action-btn">
+                        <i class="fas fa-hand-holding-heart"></i>
+                        <span>View Listings</span>
+                    </a>
+                    <a href="{% url 'saved_listings' %}" class="btn btn-outline-primary quick-action-btn">
+                        <i class="fas fa-heart"></i>
+                        <span>Saved Listings</span>
+                    </a>
+                    <a href="{% url 'community' %}" class="btn btn-outline-primary quick-action-btn">
+                        <i class="fas fa-users"></i>
+                        <span>Community</span>
+                    </a>
+                    <a href="{#}" class="btn btn-outline-primary quick-action-btn">
+                        <i class="fas fa-comments"></i>
+                        <span>Messages</span>
+                        <span class="message-badge">{{ unread_messages_count }}</span>
+                    </a>
+                </div>
+                <!-- User Profile -->
+                <div class="user-profile">
+                    <div class="dropdown">
+                        <button class="profile-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <img src="{{ user.profile_image.url|default:'static/assets/images/avatar-placeholder.jpg' }}" alt="Profile" class="avatar-img">
+                            <div class="user-info">
+                                <span class="user-name">{{ user.get_full_name }}</span>
+                                <span class="user-role">{{ user.role }}</span>
+                            </div>
+                            <i class="fas fa-chevron-down ms-2"></i>
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end profile-menu">
+                            <li>
+                                <a class="dropdown-item" href="#">
+                                    <i class="fas fa-user"></i>
+                                    <span>Edit Profile</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item" href="#">
+                                    <i class="fas fa-clipboard-list"></i>
+                                    <span>My Requirements</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item" href="#">
+                                    <i class="fas fa-bell"></i>
+                                    <span>Notifications</span>
+                                    <span class="notification-badge">{{ notification_count }}</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item" href="{% url 'settings' %}">
+                                    <i class="fas fa-cog"></i>
+                                    <span>Settings</span>
+                                </a>
+                            </li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li>
+                                <a class="dropdown-item text-danger" href="{% url 'index' %}">
+                                    <i class="fas fa-sign-out-alt"></i>
+                                    <span>Logout</span>
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="container">
+            <!-- Financial Assessment Form Section -->
+            <section id="assessment" class="mb-5">
+                <h1 class="page-title">Financial Support Assessment</h1>
+                <p class="lead">Complete this questionnaire to get personalized financial assistance recommendations.</p>
+                
+                <!-- Financial Assessment Form -->
+                <form id="financialAssessmentForm" class="assessment-form">
+                    {% csrf_token %}
+                    <!-- Step 1: Basic Information -->
+                    <div class="assessment-section" id="step1">
+                        <h3>Step 1: Basic Information</h3>
+                        <div class="mb-3">
+                            <label for="monthlyIncome" class="form-label">What is your monthly income? (in ₹)</label>
+                            <input type="number" class="form-control" id="monthlyIncome" name="monthly_income" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Are you currently employed?</label>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="employment_status" id="employed" value="employed" required>
+                                <label class="form-check-label" for="employed">Yes, Full-time</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="employment_status" id="partTime" value="partTime">
+                                <label class="form-check-label" for="partTime">Yes, Part-time</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="employment_status" id="selfEmployed" value="selfEmployed">
+                                <label class="form-check-label" for="selfEmployed">Self-employed</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="employment_status" id="unemployed" value="unemployed">
+                                <label class="form-check-label" for="unemployed">Currently unemployed</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Step 2: Housing Preferences -->
+                    <div class="assessment-section" id="step2">
+                        <h3>Step 2: Housing Preferences</h3>
+                        <div class="mb-3">
+                            <label for="preferredLocation" class="form-label">Preferred Location</label>
+                            <select class="form-select" id="preferredLocation" name="preferred_location" required>
+                                <option value="">Select location</option>
+                                <option value="urban">Urban Area</option>
+                                <option value="suburban">Suburban Area</option>
+                                <option value="rural">Rural Area</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="maxBudget" class="form-label">Maximum Monthly Budget for Housing (in ₹)</label>
+                            <input type="number" class="form-control" id="maxBudget" name="max_budget" required>
+                        </div>
+                    </div>
+
+                    <!-- Step 3: Financial History -->
+                    <div class="assessment-section" id="step3">
+                        <h3>Step 3: Financial History</h3>
+                        <div class="mb-3">
+                            <label class="form-label">Do you have any existing loans?</label>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="existing_loans" id="hasLoans" value="yes" required>
+                                <label class="form-check-label" for="hasLoans">Yes</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="existing_loans" id="noLoans" value="no">
+                                <label class="form-check-label" for="noLoans">No</label>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="creditScore" class="form-label">Credit Score (if known)</label>
+                            <input type="number" class="form-control" id="creditScore" name="credit_score" min="300" max="900">
+                            <small class="form-text text-muted">Leave blank if unknown</small>
+                        </div>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-primary">Get Recommendations</button>
+                    </div>
+                </form>
+
+                <!-- Results Section (Initially Hidden) -->
+                <div id="assessmentResults" class="assessment-results" style="display: none;">
+                    <h2>Your Personalized Recommendations</h2>
+                    <div class="results-content">
+                        <!-- Results will be populated by JavaScript -->
+                    </div>
+                </div>
+            </section>
+
+            <!-- Government Schemes Section -->
+            <section id="government-schemes" class="mb-5">
+                <h2 class="section-title">Government Housing Schemes</h2>
+                <p class="section-description">Explore government schemes that can help you achieve your housing goals.</p>
+                
+                <div class="schemes-container">
+                    {% for scheme in government_schemes %}
+                    <div class="scheme-card">
+                        <div class="scheme-header">
+                            <img src="{{ scheme.logo.url }}" alt="{{ scheme.name }}">
+                            <h4>{{ scheme.name }}</h4>
+                        </div>
+                        <div class="scheme-body">
+                            <p>{{ scheme.description }}</p>
+                            <ul class="scheme-details">
+                                <li><strong>Eligibility:</strong> {{ scheme.eligibility }}</li>
+                                <li><strong>Benefits:</strong> {{ scheme.benefits }}</li>
+                                <li><strong>Application:</strong> {{ scheme.application_process }}</li>
+                            </ul>
+                            <a href="{{ scheme.website_url }}" class="btn btn-outline-primary" target="_blank">Learn More</a>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <p>No government schemes available at the moment.</p>
+                    {% endfor %}
+                </div>
+            </section>
+
+            <!-- NGO Support Section -->
+            <section id="ngo-support" class="mb-5">
+                <h2 class="section-title">NGO Support Network</h2>
+                <p class="section-description">Connect with NGOs that provide housing assistance and support.</p>
+                
+                <div class="ngo-container">
+                    {% for ngo in ngos %}
+                    <div class="ngo-card">
+                        <div class="ngo-header">
+                            <img src="{{ ngo.logo.url }}" alt="{{ ngo.name }}">
+                            <h4>{{ ngo.name }}</h4>
+                        </div>
+                        <div class="ngo-body">
+                            <p>{{ ngo.description }}</p>
+                            <ul class="ngo-details">
+                                <li><strong>Focus Areas:</strong> {{ ngo.focus_areas }}</li>
+                                <li><strong>Services:</strong> {{ ngo.services }}</li>
+                                <li><strong>Location:</strong> {{ ngo.locations }}</li>
+                            </ul>
+                            <div class="ngo-contact">
+                                <a href="tel:{{ ngo.contact_phone }}" class="btn btn-outline-primary">Call</a>
+                                <a href="mailto:{{ ngo.contact_email }}" class="btn btn-outline-primary">Email</a>
+                                <a href="{{ ngo.website_url }}" class="btn btn-outline-primary" target="_blank">Website</a>
+                            </div>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <p>No NGOs available at the moment.</p>
+                    {% endfor %}
+                </div>
+            </section>
+
+            <!-- Housing Loan Calculator Section -->
+            <section id="loan-calculator" class="mb-5">
+                <h2 class="section-title">Housing Loan Calculator</h2>
+                <p class="section-description">Calculate your potential loan EMI and plan your finances.</p>
+                
+                <div class="calculator-container">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <form id="loanCalculatorForm" class="calculator-form">
+                                <div class="mb-3">
+                                    <label for="propertyValue" class="form-label">Property Value (₹)</label>
+                                    <input type="number" class="form-control" id="propertyValue" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="downPayment" class="form-label">Down Payment (₹)</label>
+                                    <input type="number" class="form-control" id="downPayment" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="loanTerm" class="form-label">Loan Term (Years)</label>
+                                    <input type="number" class="form-control" id="loanTerm" min="1" max="30" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="interestRate" class="form-label">Interest Rate (%)</label>
+                                    <input type="number" class="form-control" id="interestRate" step="0.1" required>
+                                </div>
+                                <button type="submit" class="btn btn-primary">Calculate EMI</button>
+                            </form>
+                        </div>
+                        <div class="col-md-6">
+                            <div id="calculationResults" class="calculation-results">
+                                <!-- Results will be populated by JavaScript -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Success Stories Section -->
+            <section id="success-stories" class="mb-5">
+                <h2 class="section-title">Success Stories</h2>
+                <p class="section-description">Read about people who found their dream homes through Kudil.</p>
+                
+                <div class="testimonial-slider">
+                    <div id="testimonialCarousel" class="carousel slide" data-bs-ride="carousel">
+                        <div class="carousel-inner">
+                            {% for testimonial in testimonials %}
+                            <div class="carousel-item {% if forloop.first %}active{% endif %}">
+                                <div class="testimonial-card">
+                                    <img src="{{ testimonial.image.url }}" alt="{{ testimonial.author_name }}" class="testimonial-image">
+                                    <p class="testimonial-text">"{{ testimonial.text }}"</p>
+                                    <h6 class="testimonial-author">{{ testimonial.author_name }}, {{ testimonial.author_location }}</h6>
+                                </div>
+                            </div>
+                            {% empty %}
+                            <div class="carousel-item active">
+                                <div class="testimonial-card">
+                                    <img src="{% static 'assets/images/testimonial1.jpg' %}" alt="Testimonial 1" class="testimonial-image">
+                                    <p class="testimonial-text">"Kudil helped me find my dream home in a sustainable community. I'm so grateful for their support!"</p>
+                                    <h6 class="testimonial-author">Rahul, Bangalore</h6>
+                                </div>
+                            </div>
+                            <div class="carousel-item">
+                                <div class="testimonial-card">
+                                    <img src="{% static 'assets/images/testimonial2.jpg' %}" alt="Testimonial 2" class="testimonial-image">
+                                    <p class="testimonial-text">"Kudil's financial assistance program made it possible for me to own a home. Thank you, Kudil!"</p>
+                                    <h6 class="testimonial-author">Priya, Chennai</h6>
+                                </div>
+                            </div>
+                            <div class="carousel-item">
+                                <div class="testimonial-card">
+                                    <img src="{% static 'assets/images/testimonial3.jpg' %}" alt="Testimonial 3" class="testimonial-image">
+                                    <p class="testimonial-text">"Kudil's community support network helped me navigate the home buying process. I'm so happy with my new home!"</p>
+                                    <h6 class="testimonial-author">Kumar, Hyderabad</h6>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        <button class="carousel-control-prev" type="button" data-bs-target="#testimonialCarousel" data-bs-slide="prev">
+                            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                            <span class="visually-hidden">Previous</span>
+                        </button>
+                        <button class="carousel-control-next" type="button" data-bs-target="#testimonialCarousel" data-bs-slide="next">
+                            <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                            <span class="visually-hidden">Next</span>
+                        </button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Disclaimer Section -->
+            <section id="disclaimer" class="mb-5">
+                <div class="disclaimer-container">
+                    <h3>Important Disclaimer</h3>
+                    <p class="disclaimer-text">
+                        The information provided on this page is for general guidance only and does not constitute financial advice. 
+                        All calculations are estimates and actual terms may vary. Please consult with financial professionals before 
+                        making any financial decisions. Kudil does not guarantee the accuracy of third-party information or the 
+                        availability of schemes and support services listed.
+                    </p>
+                </div>
+            </section>
+        </div>
+
+        <!-- Chatbot -->
+        <div class="chatbot-widget">
+            <button class="chatbot-toggle" type="button">
+                <i class="fas fa-comments"></i>
+            </button>
+            <div class="chatbot-container">
+                <div class="chatbot-header">
+                    <h5 class="mb-0">Kudil Assistant</h5>
+                    <button type="button" class="btn-close"></button>
+                </div>
+                <div class="chatbot-messages">
+                    {% for message in chatbot_initial_messages %}
+                    <div class="message {{ message.type }}-message">
+                        <div class="message-content">
+                            {{ message.content }}
+                        </div>
+                        <span class="message-time">{{ message.timestamp|date:"g:i A" }}</span>
+                    </div>
+                    {% empty %}
+                    <div class="message bot-message">
+                        <div class="message-content">
+                            Hello! How can I help you today?
+                        </div>
+                        <span class="message-time">Just now</span>
+                    </div>
+                    {% endfor %}
+                </div>
+                <div class="chatbot-input">
+                    <input type="text" class="form-control" placeholder="Type your message...">
+                    <button class="btn btn-primary">
+                        <i class="fas fa-paper-plane"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-4 mb-4 mb-md-0">
+                    <div class="brand-logo mb-3">
+                        <i class="fas fa-home"></i>
+                        <span class="brand-text">kudil</span>
+                    </div>
+                    <p class="text-muted">Making sustainable housing accessible to everyone.</p>
+                    <div class="social-links">
+                        <a href="{{ social_links.facebook }}" class="me-3"><i class="fab fa-facebook"></i></a>
+                        <a href="{{ social_links.twitter }}" class="me-3"><i class="fab fa-twitter"></i></a>
+                        <a href="{{ social_links.instagram }}" class="me-3"><i class="fab fa-instagram"></i></a>
+                        <a href="{{ social_links.linkedin }}"><i class="fab fa-linkedin"></i></a>
+                    </div>
+                </div>
+                <div class="col-md-4 mb-4 mb-md-0">
+                    <h6>Quick Links</h6>
+                    <ul class="list-unstyled">
+                        <li><a href="#">About Us</a></li>
+                        <li><a href="#">Contact</a></li>
+                        <li><a href="#">Blog</a></li>
+                        <li><a href="#">FAQ</a></li>
+                    </ul>
+                </div>
+                <div class="col-md-4">
+                    <h6>Newsletter</h6>
+                    <p class="text-muted">Subscribe to get the latest updates on sustainable living.</p>
+                    <form method="post" action="#" class="newsletter-form">
+                        {% csrf_token %}
+                        <div class="input-group mb-3">
+                            <input type="email" name="email" class="form-control" placeholder="Enter your email" required>
+                            <button class="btn btn-primary" type="submit">Subscribe</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            <hr>
+            <div class="row align-items-center">
+                <div class="col-md-6 text-center text-md-start">
+                    <p class="copyright mb-0">
+                        {% now "Y" %} Kudil. Made with <i class="fas fa-heart heart-icon"></i> in India
+                    </p>
+                </div>
+                <div class="col-md-6 text-center text-md-end mt-3 mt-md-0">
+                    <ul class="list-inline mb-0">
+                        <li class="list-inline-item"><a href="#">Privacy Policy</a></li>
+                        <li class="list-inline-item">•</li>
+                        <li class="list-inline-item"><a href="#">Terms of Use</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Required Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="{% static 'js/financial-support.js' %}"></script>
+</body>
+</html>

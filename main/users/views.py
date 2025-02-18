@@ -17,22 +17,30 @@ def signup(request):
         username = request.POST.get("username")
         password = request.POST.get("password")
         first_name = request.POST.get("first_name", "")
-        last_name = request.POST.get("last_name", "")  # Default to empty string if not provided
-        user_type = request.POST.get("user_type")  # 'seeker' or 'owner'
+        last_name = request.POST.get("last_name", "")
+        user_type = request.POST.get("user_type", "seeker")  # Default to seeker if not provided
 
-        # Create the custom user instance with all necessary fields
-        user = CustomUser.objects.create_user(
-            email=email,
-            username=username,
-            password=password,
-            first_name=first_name,
-            last_name=last_name,
-            user_type=user_type,
-        )
+        # Create the user instance
+        try:
+            user = User.objects.create_user(
+                username=username,
+                email=email,
+                password=password,
+                first_name=first_name,
+                last_name=last_name
+            )
+            
+            # Update the user's profile with user_type
+            profile = user.profile
+            profile.user_type = user_type
+            profile.save()
 
-        # Optionally, log the user in after successful signup
-        login(request, user)
-
-        return redirect("login")  # Redirect to login after signup
+            # Log the user in after successful signup
+            login(request, user)
+            messages.success(request, "Account created successfully!")
+            return redirect("login")
+        except Exception as e:
+            messages.error(request, f"Error creating account: {str(e)}")
+            return render(request, "users/signup.html")
 
     return render(request, "users/signup.html")

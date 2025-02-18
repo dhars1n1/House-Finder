@@ -35,22 +35,22 @@
                         <i class="fas fa-map-marked-alt"></i>
                         <span>View Listings</span>
                     </a>
-                    <a href="#" class="btn btn-outline-primary quick-action-btn">
+                    <a href="{% url 'financial_support' %}" class="btn btn-outline-primary quick-action-btn">
                         <i class="fas fa-hand-holding-heart"></i>
                         <span>Financial Support</span>
                     </a>
-                    <a href="#" class="btn btn-outline-primary quick-action-btn">
+                    <a href="{% url 'saved_listings' %}" class="btn btn-outline-primary quick-action-btn">
                         <i class="fas fa-heart"></i>
                         <span>Saved Listings</span>
                     </a>
-                    <a href="#" class="btn btn-outline-primary quick-action-btn">
+                    <a href="{% url 'community' %}" class="btn btn-outline-primary quick-action-btn">
                         <i class="fas fa-users"></i>
                         <span>Community</span>
                     </a>
-                    <a href="#" class="btn btn-outline-primary quick-action-btn">
+                    <a href="{% url 'messages' %}" class="btn btn-outline-primary quick-action-btn">
                         <i class="fas fa-comments"></i>
                         <span>Messages</span>
-                        <span class="message-badge">{{ message_count }}</span>
+                        <span class="message-badge">{{ unread_messages_count|default:"0" }}</span>
                     </a>
                 </div>
                 <!-- User Profile -->
@@ -254,9 +254,25 @@
         </div>
     </div>
 </div>
+<!-- Footer -->
 <footer>
-    <p>&copy; 2025 My Django App. All rights reserved.</p>
+    <div class="container">
+        <div class="footer-content">
+            <p>&copy; 2025 Kudil. All rights reserved.</p>
+            <div class="footer-links">
+                <a>Terms of Service</a>
+                <a>Privacy Policy</a>
+            </div>
+            <div class="social-links">
+                <a href="#" aria-label="Facebook"><i class="fab fa-facebook"></i></a>
+                <a href="#" aria-label="Twitter"><i class="fab fa-twitter"></i></a>
+                <a href="#" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+                <a href="#" aria-label="LinkedIn"><i class="fab fa-linkedin"></i></a>
+            </div>
+        </div>
+    </div>
 </footer>
+
 
 <!-- Bootstrap JS -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
